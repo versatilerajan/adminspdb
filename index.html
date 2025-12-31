@@ -127,23 +127,36 @@
     const admin_password = document.getElementById("adminPass").value
     const errorBox = document.getElementById("error")
     errorBox.textContent = ""
+    console.log("Login attempt:", { station, admin_id: admin_id ? "***" : "", hasPassword: !!admin_password })
+    
     if (!station || !admin_id || !admin_password) {
       errorBox.textContent = "All fields are required"
+      console.error("Login validation failed: Missing fields")
       return
     }
     try {
+      console.log("Sending login request to:", `${API_BASE_URL}/admin/login`)
       const res = await fetch(`${API_BASE_URL}/admin/login`, {
         method: "POST",
+        mode: 'cors',  // Explicit CORS mode
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ station, admin_id, admin_password })
       })
+      console.log("Login response status:", res.status)
+      if (!res.ok) {
+        const errorData = await res.text();  // Use .text() for non-JSON errors
+        console.error("Login error body:", errorData)
+        throw new Error(errorData || "Login failed")
+      }
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      console.log("Login response data:", data)
+      console.log("Login successful, fetching complaints for:", station)
       fetchComplaints(station)
       document.getElementById("loginBox").classList.add("hidden")
       document.getElementById("dataTable").classList.remove("hidden")
     } catch (err) {
-      errorBox.textContent = err.message
+      console.error("Login error:", err)
+      errorBox.textContent = `Login failed: ${err.message}`  // Show CORS errors clearly
     }
   }
 
@@ -152,24 +165,28 @@
     if (station !== "ALL") {
       url += `?station=${station}`
     }
+    console.log("Fetching from URL:", url)
     try {
-      const res = await fetch(url)
+      const res = await fetch(url, { mode: 'cors' })  // Explicit CORS for GET too
+      console.log("Fetch response status:", res.status)
       if (!res.ok) {
         throw new Error(`Fetch failed: ${res.status} ${res.statusText}`)
       }
       const data = await res.json()
-      // Optional: Check if data is an error object (backend sometimes returns {error: ...})
+      console.log("Fetched data:", data)
       if (data.error) {
         throw new Error(data.error)
       }
-      // Handle empty results gracefully
       if (!Array.isArray(data) || data.length === 0) {
+        console.warn("No data found")
         document.getElementById("tableBody").innerHTML = '<tr><td colspan="9" style="text-align: center;">No complaints found.</td></tr>'
         return
       }
+      console.log(`Rendering ${data.length} rows`)
       const tbody = document.getElementById("tableBody")
       tbody.innerHTML = ""
-      data.forEach(row => {
+      data.forEach((row, index) => {
+        console.log(`Row ${index}:`, row)
         tbody.innerHTML += `
           <tr>
             <td>${row.police_station || ''}</td>
@@ -184,8 +201,9 @@
           </tr>
         `
       })
+      console.log("Table rendered successfully")
     } catch (err) {
-      console.error('Fetch error:', err)  // For debugging in browser console
+      console.error('Fetch error:', err)
       const tbody = document.getElementById("tableBody")
       tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: red;">Error loading data: ${err.message}</td></tr>`
     }
