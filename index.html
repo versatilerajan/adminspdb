@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Police Admin Panel</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .login-box {
+      max-width: 400px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+    button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background: #fff;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #007bff;
+      color: white;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Police Complaint Admin Panel</h1>
+
+<div class="login-box" id="loginBox">
+  <select id="station">
+    <option value="">-- Select Police Station --</option>
+    <option value="ALL">ALL (Main Admin)</option>
+    <option value="MuffassilPoliceStation">Muffassil Police Station</option>
+    <option value="SiwanSadarTownPoliceStation">Siwan Sadar Town Police Station</option>
+    <option value="ZiradeiPoliceStation">Ziradei Police Station</option>
+    <option value="AsaonPoliceStation">Asaon Police Station</option>
+    <option value="BarhariyaPoliceStation">Barhariya Police Station</option>
+    <option value="ChainpurPoliceStation">Chainpur Police Station</option>
+    <option value="DhanautiOPPoliceStation">Dhanauti O.P. Police Station</option>
+    <option value="MHNagarHasanpuraPoliceStation">M.H. Nagar Hasanpura Police Station</option>
+    <option value="AandarPoliceStation">Aandar Police Station</option>
+    <option value="BhagwanpurHattPoliceStation">Bhagwanpur Hatt Police Station</option>
+    <option value="GBNagarPoliceStation">G.B. Nagar Police Station</option>
+    <option value="HussainganjPoliceStation">Hussainganj Police Station</option>
+    <option value="GoreyakothiPoliceStation">Goreyakothi Police Station</option>
+    <option value="MaharajganjPoliceStation">Maharajganj Police Station</option>
+    <option value="MairwaPoliceStation">Mairwa Police Station</option>
+    <option value="DaraundhaPoliceStation">Daraundha Police Station</option>
+    <option value="NautanPoliceStation">Nautan Police Station</option>
+    <option value="SaraiOPPoliceStation">Sarai O.P. Police Station</option>
+    <option value="SiswanPoliceStation">Siswan Police Station</option>
+    <option value="DarauliPoliceStation">Darauli Police Station</option>
+    <option value="MahadevaOPPoliceStation">Mahadeva O.P. Police Station</option>
+    <option value="RaghunathpurPoliceStation">Raghunathpur Police Station</option>
+    <option value="GuthaniPoliceStation">Guthani Police Station</option>
+    <option value="BasantpurPoliceStation">Basantpur Police Station</option>
+    <option value="PachrukhiPoliceStation">Pachrukhi Police Station</option>
+    <option value="SCSTThanaPoliceStation">SC-ST Thana Police Station</option>
+    <option value="MahilaThanaPoliceStation">Mahila Thana Police Station</option>
+    <option value="JamoBazarPoliceStation">Jamo Bazar Police Station</option>
+  </select>
+
+  <input type="text" id="adminId" placeholder="Admin ID" />
+  <input type="password" id="adminPass" placeholder="Admin Password" />
+  <button onclick="login()">Login</button>
+
+  <div class="error" id="error"></div>
+</div>
+
+<table id="dataTable" class="hidden">
+  <thead>
+    <tr>
+      <th>Police Station</th>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Address</th>
+      <th>Subject</th>
+      <th>Incident Date</th>
+      <th>Document</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+  const API_BASE_URL = "https://spdbsupabasevercel.vercel.app"
+
+  async function login() {
+    const station = document.getElementById("station").value
+    const admin_id = document.getElementById("adminId").value
+    const admin_password = document.getElementById("adminPass").value
+    const errorBox = document.getElementById("error")
+
+    errorBox.textContent = ""
+
+    if (!station || !admin_id || !admin_password) {
+      errorBox.textContent = "All fields are required"
+      return
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ station, admin_id, admin_password })
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+
+      fetchComplaints(station)
+      document.getElementById("loginBox").classList.add("hidden")
+      document.getElementById("dataTable").classList.remove("hidden")
+
+    } catch (err) {
+      errorBox.textContent = err.message
+    }
+  }
+
+  async function fetchComplaints(station) {
+    let url = `${API_BASE_URL}/complaints`
+    if (station !== "ALL") {
+      url += `?station=${station}`
+    }
+
+    const res = await fetch(url)
+    const data = await res.json()
+
+    const tbody = document.getElementById("tableBody")
+    tbody.innerHTML = ""
+
+    data.forEach(row => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${row.police_station}</td>
+          <td>${row.complainant_name}</td>
+          <td>${row.complainant_phone}</td>
+          <td>${row.complainant_address}</td>
+          <td>${row.complain_subject}</td>
+          <td>${row.incident_date}</td>
+          <td><a href="${row.document_link}" target="_blank">View</a></td>
+        </tr>
+      `
+    })
+  }
+</script>
+
+</body>
+</html>
