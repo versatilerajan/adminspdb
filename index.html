@@ -68,34 +68,34 @@
   <select id="station">
     <option value="">-- Select Police Station --</option>
     <option value="ALL">ALL (Main Admin)</option>
-    <option value="MuffassilPoliceStation">Muffassil Police Station</option>
-    <option value="SiwanSadarTownPoliceStation">Siwan Sadar Town Police Station</option>
-    <option value="ZiradeiPoliceStation">Ziradei Police Station</option>
-    <option value="AsaonPoliceStation">Asaon Police Station</option>
-    <option value="BarhariyaPoliceStation">Barhariya Police Station</option>
-    <option value="ChainpurPoliceStation">Chainpur Police Station</option>
-    <option value="DhanautiOPPoliceStation">Dhanauti O.P. Police Station</option>
-    <option value="MHNagarHasanpuraPoliceStation">M.H. Nagar Hasanpura Police Station</option>
-    <option value="AandarPoliceStation">Aandar Police Station</option>
-    <option value="BhagwanpurHattPoliceStation">Bhagwanpur Hatt Police Station</option>
-    <option value="GBNagarPoliceStation">G.B. Nagar Police Station</option>
-    <option value="HussainganjPoliceStation">Hussainganj Police Station</option>
-    <option value="GoreyakothiPoliceStation">Goreyakothi Police Station</option>
-    <option value="MaharajganjPoliceStation">Maharajganj Police Station</option>
-    <option value="MairwaPoliceStation">Mairwa Police Station</option>
-    <option value="DaraundhaPoliceStation">Daraundha Police Station</option>
-    <option value="NautanPoliceStation">Nautan Police Station</option>
-    <option value="SaraiOPPoliceStation">Sarai O.P. Police Station</option>
-    <option value="SiswanPoliceStation">Siswan Police Station</option>
-    <option value="DarauliPoliceStation">Darauli Police Station</option>
-    <option value="MahadevaOPPoliceStation">Mahadeva O.P. Police Station</option>
-    <option value="RaghunathpurPoliceStation">Raghunathpur Police Station</option>
-    <option value="GuthaniPoliceStation">Guthani Police Station</option>
-    <option value="BasantpurPoliceStation">Basantpur Police Station</option>
-    <option value="PachrukhiPoliceStation">Pachrukhi Police Station</option>
-    <option value="SCSTThanaPoliceStation">SC-ST Thana Police Station</option>
-    <option value="MahilaThanaPoliceStation">Mahila Thana Police Station</option>
-    <option value="JamoBazarPoliceStation">Jamo Bazar Police Station</option>
+    <option value="Muffassil Police Station">Muffassil Police Station</option>
+    <option value="Siwan Sadar Town Police Station">Siwan Sadar Town Police Station</option>
+    <option value="Ziradei Police Station">Ziradei Police Station</option>
+    <option value="Asaon Police Station">Asaon Police Station</option>
+    <option value="Barhariya Police Station">Barhariya Police Station</option>
+    <option value="Chainpur Police Station">Chainpur Police Station</option>
+    <option value="Dhanauti O.P. Police Station">Dhanauti O.P. Police Station</option>
+    <option value="M.H. Nagar Hasanpura Police Station">M.H. Nagar Hasanpura Police Station</option>
+    <option value="Aandar Police Station">Aandar Police Station</option>
+    <option value="Bhagwanpur Hatt Police Station">Bhagwanpur Hatt Police Station</option>
+    <option value="G.B. Nagar Police Station">G.B. Nagar Police Station</option>
+    <option value="Hussainganj Police Station">Hussainganj Police Station</option>
+    <option value="Goreyakothi Police Station">Goreyakothi Police Station</option>
+    <option value="Maharajganj Police Station">Maharajganj Police Station</option>
+    <option value="Mairwa Police Station">Mairwa Police Station</option>
+    <option value="Daraundha Police Station">Daraundha Police Station</option>
+    <option value="Nautan Police Station">Nautan Police Station</option>
+    <option value="Sarai O.P. Police Station">Sarai O.P. Police Station</option>
+    <option value="Siswan Police Station">Siswan Police Station</option>
+    <option value="Darauli Police Station">Darauli Police Station</option>
+    <option value="Mahadeva O.P. Police Station">Mahadeva O.P. Police Station</option>
+    <option value="Raghunathpur Police Station">Raghunathpur Police Station</option>
+    <option value="Guthani Police Station">Guthani Police Station</option>
+    <option value="Basantpur Police Station">Basantpur Police Station</option>
+    <option value="Pachrukhi Police Station">Pachrukhi Police Station</option>
+    <option value="SC-ST Thana Police Station">SC-ST Thana Police Station</option>
+    <option value="Mahila Thana Police Station">Mahila Thana Police Station</option>
+    <option value="Jamo Bazar Police Station">Jamo Bazar Police Station</option>
   </select>
   <input type="text" id="adminId" placeholder="Admin ID" />
   <input type="password" id="adminPass" placeholder="Admin Password" />
@@ -105,6 +105,7 @@
 <table id="dataTable" class="hidden">
   <thead>
     <tr>
+      <th>ID</th>
       <th>Police Station</th>
       <th>Role</th>
       <th>Name</th>
@@ -112,6 +113,7 @@
       <th>Address</th>
       <th>Subject</th>
       <th>Details</th>
+      <th>Status</th>
       <th>Incident Date</th>
       <th>Document</th>
     </tr>
@@ -120,7 +122,6 @@
 </table>
 <script>
   const API_BASE_URL = "https://spdbsupabasevercel.vercel.app"
-
   async function login() {
     const station = document.getElementById("station").value
     const admin_id = document.getElementById("adminId").value
@@ -128,7 +129,7 @@
     const errorBox = document.getElementById("error")
     errorBox.textContent = ""
     console.log("Login attempt:", { station, admin_id: admin_id ? "***" : "", hasPassword: !!admin_password })
-    
+   
     if (!station || !admin_id || !admin_password) {
       errorBox.textContent = "All fields are required"
       console.error("Login validation failed: Missing fields")
@@ -138,36 +139,35 @@
       console.log("Sending login request to:", `${API_BASE_URL}/admin/login`)
       const res = await fetch(`${API_BASE_URL}/admin/login`, {
         method: "POST",
-        mode: 'cors',  // Explicit CORS mode
+        mode: 'cors', // Explicit CORS mode
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ station, admin_id, admin_password })
       })
       console.log("Login response status:", res.status)
       if (!res.ok) {
-        const errorData = await res.text();  // Use .text() for non-JSON errors
+        const errorData = await res.text(); // Use .text() for non-JSON errors
         console.error("Login error body:", errorData)
         throw new Error(errorData || "Login failed")
       }
       const data = await res.json()
       console.log("Login response data:", data)
       console.log("Login successful, fetching complaints for:", station)
-      fetchComplaints(station)
+      fetchComplaints(station, data.role)
       document.getElementById("loginBox").classList.add("hidden")
       document.getElementById("dataTable").classList.remove("hidden")
     } catch (err) {
       console.error("Login error:", err)
-      errorBox.textContent = `Login failed: ${err.message}`  // Show CORS errors clearly
+      errorBox.textContent = `Login failed: ${err.message}` // Show CORS errors clearly
     }
   }
-
-  async function fetchComplaints(station) {
-    let url = `${API_BASE_URL}/complaints`
+  async function fetchComplaints(station, role) {
+    let url = `${API_BASE_URL}/admin/complaints?role=${role}`
     if (station !== "ALL") {
-      url += `?station=${station}`
+      url += `&station=${encodeURIComponent(station)}`
     }
     console.log("Fetching from URL:", url)
     try {
-      const res = await fetch(url, { mode: 'cors' })  // Explicit CORS for GET too
+      const res = await fetch(url, { mode: 'cors' }) // Explicit CORS for GET too
       console.log("Fetch response status:", res.status)
       if (!res.ok) {
         throw new Error(`Fetch failed: ${res.status} ${res.statusText}`)
@@ -179,7 +179,7 @@
       }
       if (!Array.isArray(data) || data.length === 0) {
         console.warn("No data found")
-        document.getElementById("tableBody").innerHTML = '<tr><td colspan="9" style="text-align: center;">No complaints found.</td></tr>'
+        document.getElementById("tableBody").innerHTML = '<tr><td colspan="11" style="text-align: center;">No complaints found.</td></tr>'
         return
       }
       console.log(`Rendering ${data.length} rows`)
@@ -189,6 +189,7 @@
         console.log(`Row ${index}:`, row)
         tbody.innerHTML += `
           <tr>
+            <td>${row.id || ''}</td>
             <td>${row.police_station || ''}</td>
             <td>${row.complainant_role || ''}</td>
             <td>${row.complainant_name || ''}</td>
@@ -196,6 +197,7 @@
             <td>${row.complainant_address || ''}</td>
             <td>${row.complaint_subject || ''}</td>
             <td>${row.complaint_details || ''}</td>
+            <td>${row.status || 'Pending'}</td>
             <td>${row.incident_date || ''}</td>
             <td><a href="${row.document_link || '#'}" target="_blank">View</a></td>
           </tr>
@@ -205,7 +207,7 @@
     } catch (err) {
       console.error('Fetch error:', err)
       const tbody = document.getElementById("tableBody")
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: red;">Error loading data: ${err.message}</td></tr>`
+      tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: red;">Error loading data: ${err.message}</td></tr>`
     }
   }
 </script>
